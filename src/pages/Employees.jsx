@@ -1,0 +1,134 @@
+import { useEffect, useState } from "react";
+import api from "../api/axios";
+import "./Employees.css";
+
+function getEmployeesFromResponse(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.employees)) return data.employees;
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+}
+
+function formatMoney(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  const num = Number(value);
+  if (Number.isNaN(num)) return String(value);
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(num);
+}
+
+export default function Employees() {
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get("/employees");
+        const list = getEmployeesFromResponse(res?.data);
+        if (mounted) setEmployees(list);
+      } catch (e) {
+        if (mounted) setError(e?.message || "Failed to load employees");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return (
+    <section className="employeesPage">
+      <div className="employeesHeader">
+        <div>
+          <h1 className="employeesTitle">Employees</h1>
+          <p className="employeesSubtitle">Directory and compensation overview</p>
+        </div>
+        <div className="employeesMeta">
+          {loading ? "Loading…" : `${employees.length} total`}
+        </div>
+      </div>
+
+      <div className="employeesCard">
+        {loading ? (
+          <div className="employeesState">
+            <div className="employeesSpinner" aria-hidden="true" />
+            <div>
+              <div className="employeesStateTitle">Fetching employees</div>
+              <div className="employeesStateHint">
+                This should only take a moment.
+              </div>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="employeesState employeesState--error" role="alert">
+            <div className="employeesStateTitle">Couldn’t load employees</div>
+            <div className="employeesStateHint">{error}</div>
+          </div>
+        ) : employees.length === 0 ? (
+          <div className="employeesState">
+            <div className="employeesStateTitle">No employees found</div>
+            <div className="employeesStateHint">
+              The API returned an empty list.
+            </div>
+          </div>
+        ) : (
+          <div className="employeesTableWrap">
+            <table className="employeesTable">
+              <thead>
+                <tr>
+                  <th scope="col">Full name</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Country</th>
+                  <th scope="col">Job title</th>
+                  <th scope="col" className="is-right">
+                    Salary
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {employees.map((emp, idx) => {
+                  const first = emp?.firstName ?? emp?.first_name ?? "";
+                  const last = emp?.lastName ?? emp?.last_name ?? "";
+                  const fullName =
+                    (emp?.fullName ??
+                      emp?.name ??
+                      `${first} ${last}`.trim()) ||
+                    "—";
+                  const email = emp?.email ?? "—";
+                  const country = emp?.country ?? emp?.location?.country ?? "—";
+                  const jobTitle =
+                    emp?.jobTitle ?? emp?.job_title ?? emp?.title ?? "—";
+                  const salary = emp?.salary ?? emp?.compensation?.salary;
+
+                  return (
+                    <tr key={emp?.id ?? emp?._id ?? `${email}-${idx}`}>
+                      <td className="employeesName">{fullName}</td>
+                      <td className="employeesEmail">{email}</td>
+                      <td>{country}</td>
+                      <td>{jobTitle}</td>
+                      <td className="is-right employeesSalary">
+                        {formatMoney(salary)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

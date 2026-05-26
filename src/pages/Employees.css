@@ -1,0 +1,139 @@
+.employeesHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0 14px;
+}
+
+.employeesTitle {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+.employeesSubtitle {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+.employeesMeta {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.employeesCard {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.employeesTableWrap {
+  width: 100%;
+  overflow: auto;
+}
+
+.employeesTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 760px;
+}
+
+.employeesTable thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(248, 250, 252, 0.90);
+  backdrop-filter: blur(8px);
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  padding: 14px 14px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.employeesTable tbody td {
+  padding: 14px 14px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  color: #0f172a;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.employeesTable tbody tr:hover td {
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.employeesName {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.employeesEmail {
+  color: #334155;
+}
+
+.employeesSalary {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.is-right {
+  text-align: right;
+}
+
+.employeesState {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  color: #0f172a;
+}
+
+.employeesState--error {
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.employeesStateTitle {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.employeesStateHint {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.employeesSpinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(15, 23, 42, 0.18);
+  border-top-color: rgba(37, 99, 235, 0.85);
+  animation: employeesSpin 900ms linear infinite;
+}
+
+@keyframes employeesSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .employeesHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

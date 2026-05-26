@@ -14,3 +14,30 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## AI prompts
+
+``` 
+1. Create a reusable navbar React component with links:
+- Employees
+- Dashboard
+
+Use clean modern styling with plain CSS.
+
+2. Create a React Employees page.
+
+Requirements:
+- fetch employees from GET /employees using axios
+- use useEffect and useState
+- display employees in table
+- columns:
+  full name
+  email
+  country
+  job title
+  salary
+- add loading state
+- clean modern styling
+
+```
+
