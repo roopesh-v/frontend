@@ -21,13 +21,26 @@ function formatMoney(value) {
   }).format(num);
 }
 
+function getEmployeeId(emp) {
+  return emp?.id ?? emp?._id ?? null;
+}
+
+function getEmployeeFullName(emp) {
+  const first = emp?.firstName ?? emp?.first_name ?? "";
+  const last = emp?.lastName ?? emp?.last_name ?? "";
+  return (
+    (emp?.fullName ?? emp?.name ?? `${first} ${last}`.trim()) || "this employee"
+  );
+}
+
 export default function Employees() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
-  const refreshEmployees = useCallback(async () => {
-    setLoading(true);
+  const refreshEmployees = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const res = await api.get("/employees");
@@ -35,9 +48,39 @@ export default function Employees() {
     } catch (e) {
       setError(e?.message || "Failed to load employees");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
+
+  const handleDelete = useCallback(
+    async (emp) => {
+      const id = getEmployeeId(emp);
+      if (!id) return;
+
+      const fullName = getEmployeeFullName(emp);
+      const confirmed = window.confirm(
+        `Delete ${fullName}? This action cannot be undone.`
+      );
+      if (!confirmed) return;
+
+      setDeletingId(id);
+      setError(null);
+      try {
+        await api.delete(`/employees/${id}`);
+        await refreshEmployees({ silent: true });
+      } catch (e) {
+        setError(
+          e?.response?.data?.message ||
+            e?.response?.data?.error ||
+            e?.message ||
+            "Failed to delete employee"
+        );
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [refreshEmployees]
+  );
 
   useEffect(() => {
     refreshEmployees();
@@ -94,31 +137,41 @@ export default function Employees() {
                   <th scope="col" className="is-right">
                     Salary
                   </th>
+                  <th scope="col" className="is-right">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {employees.map((emp, idx) => {
-                  const first = emp?.firstName ?? emp?.first_name ?? "";
-                  const last = emp?.lastName ?? emp?.last_name ?? "";
-                  const fullName =
-                    (emp?.fullName ??
-                      emp?.name ??
-                      `${first} ${last}`.trim()) ||
-                    "—";
+                  const id = getEmployeeId(emp);
+                  const fullName = getEmployeeFullName(emp);
                   const email = emp?.email ?? "—";
                   const country = emp?.country ?? emp?.location?.country ?? "—";
                   const jobTitle =
                     emp?.jobTitle ?? emp?.job_title ?? emp?.title ?? "—";
                   const salary = emp?.salary ?? emp?.compensation?.salary;
+                  const isDeleting = deletingId === id;
 
                   return (
-                    <tr key={emp?.id ?? emp?._id ?? `${email}-${idx}`}>
+                    <tr key={id ?? `${email}-${idx}`}>
                       <td className="employeesName">{fullName}</td>
                       <td className="employeesEmail">{email}</td>
                       <td>{country}</td>
                       <td>{jobTitle}</td>
                       <td className="is-right employeesSalary">
                         {formatMoney(salary)}
+                      </td>
+                      <td className="is-right employeesActions">
+                        <button
+                          type="button"
+                          className="employeesDeleteBtn"
+                          onClick={() => handleDelete(emp)}
+                          disabled={!id || isDeleting}
+                          aria-label={`Delete ${fullName}`}
+                        >
+                          {isDeleting ? "Deleting…" : "Delete"}
+                        </button>
                       </td>
                     </tr>
                   );

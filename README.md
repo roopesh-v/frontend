@@ -52,6 +52,14 @@ Requirements:
 
 4. After employee creation, refresh employee list automatically using callback props.
 
+5. Add delete employee functionality.
+
+Requirements:
+- add delete button in each row
+- call DELETE /employees/:id
+- confirm before delete
+- refresh table after deletion
+
 
 ```
 
