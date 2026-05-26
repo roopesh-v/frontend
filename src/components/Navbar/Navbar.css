@@ -2,65 +2,93 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .appNavbar__inner {
-  height: 64px;
-  max-width: 1100px;
+  height: 68px;
+  max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
 }
 
 .appNavbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   font-weight: 700;
+  font-size: 1.0625rem;
   letter-spacing: -0.02em;
-  color: #0f172a;
+  color: var(--text);
+}
+
+.appNavbar__brand::before {
+  content: "";
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.25);
+  flex-shrink: 0;
 }
 
 .appNavbar__links {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  padding: 4px;
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
 }
 
 .appNavbar__link {
   display: inline-flex;
   align-items: center;
-  height: 38px;
-  padding: 0 12px;
-  border-radius: 10px;
-  text-decoration: none;
-  color: #334155;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
   font-weight: 600;
-  font-size: 14px;
-  border: 1px solid transparent;
-  transition: background 160ms ease, border-color 160ms ease, color 160ms ease,
-    transform 160ms ease;
+  font-size: 0.875rem;
+  transition: background var(--transition), color var(--transition),
+    box-shadow var(--transition);
 }
 
 .appNavbar__link:hover {
-  background: rgba(15, 23, 42, 0.06);
-  transform: translateY(-1px);
+  color: var(--text);
+  background: var(--panel);
 }
 
 .appNavbar__link.is-active {
-  background: rgba(37, 99, 235, 0.12);
-  border-color: rgba(37, 99, 235, 0.25);
-  color: #1d4ed8;
+  background: var(--panel);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .appNavbar__link {
-    transition: none;
+@media (max-width: 720px) {
+  .appNavbar__inner {
+    padding: 0 16px;
+    height: 60px;
   }
-  .appNavbar__link:hover {
-    transform: none;
+
+  .appNavbar__brand {
+    font-size: 0.9375rem;
+  }
+
+  .appNavbar__brand::before {
+    width: 28px;
+    height: 28px;
+  }
+
+  .appNavbar__link {
+    padding: 0 12px;
+    font-size: 0.8125rem;
   }
 }

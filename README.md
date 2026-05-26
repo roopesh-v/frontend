@@ -95,5 +95,9 @@ Requirements:
 
 12. Add country dropdown filter for employees table.
 
+13. Improve overall UI styling for professional HR dashboard appearance.
+
+14. Add loading spinner states for API calls.
+
 ```
 

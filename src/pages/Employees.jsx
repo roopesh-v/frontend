@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
 import EmployeeForm, { employeeToFormValues } from "../components/EmployeeForm";
+import LoadingState from "../components/LoadingState";
+import Spinner from "../components/Spinner";
 import "./Employees.css";
 
 function getEmployeesFromResponse(data) {
@@ -59,6 +61,7 @@ const PAGE_SIZE = 10;
 export default function Employees() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [editingEmployee, setEditingEmployee] = useState(null);
@@ -68,7 +71,8 @@ export default function Employees() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const refreshEmployees = useCallback(async ({ silent = false } = {}) => {
-    if (!silent) setLoading(true);
+    if (silent) setRefreshing(true);
+    else setLoading(true);
     setError(null);
     try {
       const res = await api.get("/employees");
@@ -76,7 +80,8 @@ export default function Employees() {
     } catch (e) {
       setError(e?.message || "Failed to load employees");
     } finally {
-      if (!silent) setLoading(false);
+      if (silent) setRefreshing(false);
+      else setLoading(false);
     }
   }, []);
 
@@ -168,19 +173,26 @@ export default function Employees() {
     debouncedSearch.trim().length > 0 || countryFilter !== "";
   const countLabel = loading
     ? "Loading…"
-    : isFiltering
-      ? `${filteredEmployees.length} of ${employees.length}`
-      : `${employees.length} total`;
+    : refreshing
+      ? "Updating…"
+      : isFiltering
+        ? `${filteredEmployees.length} of ${employees.length}`
+        : `${employees.length} total`;
 
   return (
     <section className="employeesPage">
-      <div className="employeesHeader">
+      <header className="pageHeader">
         <div>
-          <h1 className="employeesTitle">Employees</h1>
-          <p className="employeesSubtitle">Directory and compensation overview</p>
+          <h1 className="pageTitle">Employees</h1>
+          <p className="pageSubtitle">Directory and compensation overview</p>
         </div>
-        <div className="employeesMeta">{countLabel}</div>
-      </div>
+        <div
+          className={`pageBadge ${loading || refreshing ? "pageBadge--loading" : ""}`}
+        >
+          {(loading || refreshing) && <Spinner size="sm" />}
+          {countLabel}
+        </div>
+      </header>
 
       <div className="employeesFormWrap" id="employee-form">
         <EmployeeForm
@@ -194,26 +206,22 @@ export default function Employees() {
         />
       </div>
 
-      <div className="employeesCard">
+      <div className="employeesCard panel">
         {loading ? (
-          <div className="employeesState">
-            <div className="employeesSpinner" aria-hidden="true" />
-            <div>
-              <div className="employeesStateTitle">Fetching employees</div>
-              <div className="employeesStateHint">
-                This should only take a moment.
-              </div>
-            </div>
-          </div>
+          <LoadingState
+            className="panel"
+            title="Fetching employees"
+            hint="This should only take a moment."
+          />
         ) : error ? (
-          <div className="employeesState employeesState--error" role="alert">
-            <div className="employeesStateTitle">Couldn’t load employees</div>
-            <div className="employeesStateHint">{error}</div>
+          <div className="employeesState panel stateBox stateBox--error" role="alert">
+            <div className="stateTitle">Couldn’t load employees</div>
+            <div className="stateHint">{error}</div>
           </div>
         ) : employees.length === 0 ? (
-          <div className="employeesState">
-            <div className="employeesStateTitle">No employees found</div>
-            <div className="employeesStateHint">
+          <div className="employeesState panel stateBox">
+            <div className="stateTitle">No employees found</div>
+            <div className="stateHint">
               The API returned an empty list.
             </div>
           </div>
@@ -258,14 +266,21 @@ export default function Employees() {
             </div>
 
             {filteredEmployees.length === 0 ? (
-              <div className="employeesState">
-                <div className="employeesStateTitle">No matching employees</div>
-                <div className="employeesStateHint">
+              <div className="employeesState panel stateBox">
+                <div className="stateTitle">No matching employees</div>
+                <div className="stateHint">
                   Try different filters or clear your search and country selection.
                 </div>
               </div>
             ) : (
           <>
+          <div className="employeesTableSection loadingOverlayHost">
+            {refreshing && (
+              <div className="loadingOverlay" role="status" aria-live="polite">
+                <Spinner size="lg" />
+                <span>Updating employees…</span>
+              </div>
+            )}
           <div className="employeesTableWrap">
             <table className="employeesTable">
               <thead>
@@ -317,18 +332,19 @@ export default function Employees() {
                                 .getElementById("employee-form")
                                 ?.scrollIntoView({ behavior: "smooth", block: "start" });
                             }}
-                            disabled={!id || isDeleting}
+                            disabled={!id || isDeleting || refreshing}
                             aria-label={`Edit ${fullName}`}
                           >
                             Edit
                           </button>
                           <button
                             type="button"
-                            className="employeesDeleteBtn"
+                            className="employeesDeleteBtn btnWithSpinner"
                             onClick={() => handleDelete(emp)}
-                            disabled={!id || isDeleting}
+                            disabled={!id || isDeleting || refreshing}
                             aria-label={`Delete ${fullName}`}
                           >
+                            {isDeleting && <Spinner size="sm" />}
                             {isDeleting ? "Deleting…" : "Delete"}
                           </button>
                         </div>
@@ -338,6 +354,7 @@ export default function Employees() {
                 })}
               </tbody>
             </table>
+          </div>
           </div>
 
             {totalPages > 1 && (

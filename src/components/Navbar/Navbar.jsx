@@ -5,7 +5,7 @@ export default function Navbar() {
   return (
     <header className="appNavbar">
       <div className="appNavbar__inner">
-        <div className="appNavbar__brand">Company</div>
+        <div className="appNavbar__brand">HR Portal</div>
 
         <nav className="appNavbar__links" aria-label="Primary">
           <NavLink

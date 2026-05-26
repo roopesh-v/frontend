@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
+import Spinner from "./Spinner";
 import "./EmployeeForm.css";
 
 const EMPTY = Object.freeze({
@@ -130,7 +131,16 @@ export default function EmployeeForm({
   const baseErrors = errors?._base || [];
 
   return (
-    <section className="employeeFormCard">
+    <section
+      className={`employeeFormCard panel ${submitting ? "employeeFormCard--loading" : ""}`}
+      aria-busy={submitting}
+    >
+      {submitting && (
+        <div className="employeeFormLoading" role="status" aria-live="polite">
+          <Spinner size="lg" />
+          <span>{isEditing ? "Updating employee…" : "Creating employee…"}</span>
+        </div>
+      )}
       <header className="employeeFormHeader">
         <h2 className="employeeFormTitle">{resolvedTitle}</h2>
         <p className="employeeFormSubtitle">
@@ -229,7 +239,12 @@ export default function EmployeeForm({
               Cancel
             </button>
           )}
-          <button className="employeeFormSubmit" type="submit" disabled={submitting}>
+          <button
+            className="employeeFormSubmit btnWithSpinner"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting && <Spinner size="sm" light />}
             {submitting ? "Saving…" : resolvedSubmitLabel}
           </button>
         </div>

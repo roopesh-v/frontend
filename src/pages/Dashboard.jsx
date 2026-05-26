@@ -9,6 +9,8 @@ import {
   YAxis,
 } from "recharts";
 import api from "../api/axios";
+import LoadingState from "../components/LoadingState";
+import Spinner from "../components/Spinner";
 import "./Dashboard.css";
 
 function getInsightsFromResponse(data) {
@@ -174,35 +176,34 @@ export default function Dashboard() {
 
   return (
     <section className="dashboardPage">
-      <div className="dashboardHeader">
+      <header className="pageHeader">
         <div>
-          <h1 className="dashboardTitle">Dashboard</h1>
-          <p className="dashboardSubtitle">
+          <h1 className="pageTitle">Dashboard</h1>
+          <p className="pageSubtitle">
             Salary and headcount insights by country
           </p>
         </div>
-        <div className="dashboardMeta">
+        <div className={`pageBadge ${loading ? "pageBadge--loading" : ""}`}>
+          {loading && <Spinner size="sm" />}
           {loading ? "Loading…" : `${insights.length} countries`}
         </div>
-      </div>
+      </header>
 
       {loading ? (
-        <div className="dashboardState">
-          <div className="dashboardSpinner" aria-hidden="true" />
-          <div>
-            <div className="dashboardStateTitle">Fetching insights</div>
-            <div className="dashboardStateHint">This should only take a moment.</div>
-          </div>
-        </div>
+        <LoadingState
+          className="panel"
+          title="Fetching insights"
+          hint="Loading country data and employee salaries."
+        />
       ) : error ? (
-        <div className="dashboardState dashboardState--error" role="alert">
-          <div className="dashboardStateTitle">Couldn’t load insights</div>
-          <div className="dashboardStateHint">{error}</div>
+        <div className="dashboardState panel stateBox stateBox--error" role="alert">
+          <div className="stateTitle">Couldn’t load insights</div>
+          <div className="stateHint">{error}</div>
         </div>
       ) : insights.length === 0 ? (
-        <div className="dashboardState">
-          <div className="dashboardStateTitle">No insights found</div>
-          <div className="dashboardStateHint">
+        <div className="dashboardState panel stateBox">
+          <div className="stateTitle">No insights found</div>
+          <div className="stateHint">
             The API returned an empty list.
           </div>
         </div>
@@ -210,7 +211,7 @@ export default function Dashboard() {
         <>
           <div className="dashboardCharts">
             {chartData.length > 0 && (
-              <div className="dashboardChartPanel">
+              <div className="dashboardChartPanel panel">
                 <h2 className="dashboardChartTitle">Average salary by country</h2>
                 <div className="dashboardChartWrap">
                   <ResponsiveContainer width="100%" height={320}>
@@ -262,7 +263,7 @@ export default function Dashboard() {
             )}
 
             {salaryDistributionData.length > 0 && (
-              <div className="dashboardChartPanel">
+              <div className="dashboardChartPanel panel">
                 <h2 className="dashboardChartTitle">Salary distribution</h2>
                 <p className="dashboardChartHint">
                   Number of employees in each salary range
