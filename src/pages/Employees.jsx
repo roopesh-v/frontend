@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "../api/axios";
+import EmployeeForm from "../components/EmployeeForm";
 import "./Employees.css";
 
 function getEmployeesFromResponse(data) {
@@ -25,28 +26,22 @@ export default function Employees() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let mounted = true;
-
-    async function load() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await api.get("/employees");
-        const list = getEmployeesFromResponse(res?.data);
-        if (mounted) setEmployees(list);
-      } catch (e) {
-        if (mounted) setError(e?.message || "Failed to load employees");
-      } finally {
-        if (mounted) setLoading(false);
-      }
+  const refreshEmployees = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get("/employees");
+      setEmployees(getEmployeesFromResponse(res?.data));
+    } catch (e) {
+      setError(e?.message || "Failed to load employees");
+    } finally {
+      setLoading(false);
     }
-
-    load();
-    return () => {
-      mounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    refreshEmployees();
+  }, [refreshEmployees]);
 
   return (
     <section className="employeesPage">
@@ -58,6 +53,10 @@ export default function Employees() {
         <div className="employeesMeta">
           {loading ? "Loading…" : `${employees.length} total`}
         </div>
+      </div>
+
+      <div className="employeesFormWrap">
+        <EmployeeForm onSuccess={refreshEmployees} />
       </div>
 
       <div className="employeesCard">
