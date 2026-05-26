@@ -60,6 +60,15 @@ Requirements:
 - confirm before delete
 - refresh table after deletion
 
+6. Add edit employee functionality.
+
+Requirements:
+- clicking edit fills EmployeeForm
+- use PATCH /employees/:id
+- update employee
+- refresh employee list
+
+
 
 ```
 

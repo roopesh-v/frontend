@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
 import "./EmployeeForm.css";
 
@@ -11,6 +11,20 @@ const EMPTY = Object.freeze({
   department: "",
   salary: "",
 });
+
+export function employeeToFormValues(emp) {
+  if (!emp) return { ...EMPTY };
+  return {
+    first_name: emp.first_name ?? emp.firstName ?? "",
+    last_name: emp.last_name ?? emp.lastName ?? "",
+    email: emp.email ?? "",
+    country: emp.country ?? "",
+    job_title: emp.job_title ?? emp.jobTitle ?? "",
+    department: emp.department ?? "",
+    salary:
+      emp.salary != null && emp.salary !== "" ? String(emp.salary) : "",
+  };
+}
 
 function normalizeRailsErrors(payload) {
   if (!payload) return {};
@@ -36,16 +50,32 @@ function normalizeRailsErrors(payload) {
 }
 
 export default function EmployeeForm({
+  employeeId = null,
   onSuccess,
+  onCancel,
   initialValues,
-  submitLabel = "Create employee",
-  title = "New employee",
+  submitLabel,
+  title,
 }) {
-  const initial = useMemo(() => ({ ...EMPTY, ...(initialValues || {}) }), [initialValues]);
+  const isEditing = Boolean(employeeId);
+  const initial = useMemo(
+    () => ({ ...EMPTY, ...(initialValues || {}) }),
+    [initialValues]
+  );
   const [values, setValues] = useState(initial);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
+
+  const resolvedTitle = title ?? (isEditing ? "Edit employee" : "New employee");
+  const resolvedSubmitLabel =
+    submitLabel ?? (isEditing ? "Update employee" : "Create employee");
+
+  useEffect(() => {
+    setValues({ ...EMPTY, ...(initialValues || {}) });
+    setErrors({});
+    setSuccessMessage("");
+  }, [employeeId, initialValues]);
 
   function setField(name, value) {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -71,10 +101,15 @@ export default function EmployeeForm({
         },
       };
 
-      await api.post("/employees", payload);
+      if (isEditing) {
+        await api.patch(`/employees/${employeeId}`, payload);
+        setSuccessMessage("Employee updated.");
+      } else {
+        await api.post("/employees", payload);
+        setValues({ ...EMPTY });
+        setSuccessMessage("Employee created.");
+      }
 
-      setValues({ ...EMPTY });
-      setSuccessMessage("Employee created.");
       if (typeof onSuccess === "function") onSuccess();
     } catch (err) {
       const status = err?.response?.status;
@@ -97,8 +132,12 @@ export default function EmployeeForm({
   return (
     <section className="employeeFormCard">
       <header className="employeeFormHeader">
-        <h2 className="employeeFormTitle">{title}</h2>
-        <p className="employeeFormSubtitle">Fill in the details below to add an employee.</p>
+        <h2 className="employeeFormTitle">{resolvedTitle}</h2>
+        <p className="employeeFormSubtitle">
+          {isEditing
+            ? "Update the details below and save your changes."
+            : "Fill in the details below to add an employee."}
+        </p>
       </header>
 
       {baseErrors.length > 0 && (
@@ -180,8 +219,18 @@ export default function EmployeeForm({
         </div>
 
         <div className="employeeFormActions">
+          {isEditing && typeof onCancel === "function" && (
+            <button
+              className="employeeFormCancel"
+              type="button"
+              onClick={onCancel}
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+          )}
           <button className="employeeFormSubmit" type="submit" disabled={submitting}>
-            {submitting ? "Saving…" : submitLabel}
+            {submitting ? "Saving…" : resolvedSubmitLabel}
           </button>
         </div>
       </form>

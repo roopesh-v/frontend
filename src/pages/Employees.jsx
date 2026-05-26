@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import api from "../api/axios";
-import EmployeeForm from "../components/EmployeeForm";
+import EmployeeForm, { employeeToFormValues } from "../components/EmployeeForm";
 import "./Employees.css";
 
 function getEmployeesFromResponse(data) {
@@ -38,6 +38,7 @@ export default function Employees() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [editingEmployee, setEditingEmployee] = useState(null);
 
   const refreshEmployees = useCallback(async ({ silent = false } = {}) => {
     if (!silent) setLoading(true);
@@ -67,6 +68,9 @@ export default function Employees() {
       setError(null);
       try {
         await api.delete(`/employees/${id}`);
+        setEditingEmployee((current) =>
+          getEmployeeId(current) === id ? null : current
+        );
         await refreshEmployees({ silent: true });
       } catch (e) {
         setError(
@@ -81,6 +85,13 @@ export default function Employees() {
     },
     [refreshEmployees]
   );
+
+  const handleFormSuccess = useCallback(async () => {
+    setEditingEmployee(null);
+    await refreshEmployees({ silent: true });
+  }, [refreshEmployees]);
+
+  const editingId = editingEmployee ? getEmployeeId(editingEmployee) : null;
 
   useEffect(() => {
     refreshEmployees();
@@ -98,8 +109,16 @@ export default function Employees() {
         </div>
       </div>
 
-      <div className="employeesFormWrap">
-        <EmployeeForm onSuccess={refreshEmployees} />
+      <div className="employeesFormWrap" id="employee-form">
+        <EmployeeForm
+          key={editingId ?? "new"}
+          employeeId={editingId}
+          initialValues={
+            editingEmployee ? employeeToFormValues(editingEmployee) : undefined
+          }
+          onSuccess={handleFormSuccess}
+          onCancel={() => setEditingEmployee(null)}
+        />
       </div>
 
       <div className="employeesCard">
@@ -152,9 +171,13 @@ export default function Employees() {
                     emp?.jobTitle ?? emp?.job_title ?? emp?.title ?? "—";
                   const salary = emp?.salary ?? emp?.compensation?.salary;
                   const isDeleting = deletingId === id;
+                  const isEditing = editingId === id;
 
                   return (
-                    <tr key={id ?? `${email}-${idx}`}>
+                    <tr
+                      key={id ?? `${email}-${idx}`}
+                      className={isEditing ? "employeesRow--editing" : undefined}
+                    >
                       <td className="employeesName">{fullName}</td>
                       <td className="employeesEmail">{email}</td>
                       <td>{country}</td>
@@ -163,15 +186,31 @@ export default function Employees() {
                         {formatMoney(salary)}
                       </td>
                       <td className="is-right employeesActions">
-                        <button
-                          type="button"
-                          className="employeesDeleteBtn"
-                          onClick={() => handleDelete(emp)}
-                          disabled={!id || isDeleting}
-                          aria-label={`Delete ${fullName}`}
-                        >
-                          {isDeleting ? "Deleting…" : "Delete"}
-                        </button>
+                        <div className="employeesActionGroup">
+                          <button
+                            type="button"
+                            className="employeesEditBtn"
+                            onClick={() => {
+                              setEditingEmployee(emp);
+                              document
+                                .getElementById("employee-form")
+                                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                            }}
+                            disabled={!id || isDeleting}
+                            aria-label={`Edit ${fullName}`}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            className="employeesDeleteBtn"
+                            onClick={() => handleDelete(emp)}
+                            disabled={!id || isDeleting}
+                            aria-label={`Delete ${fullName}`}
+                          >
+                            {isDeleting ? "Deleting…" : "Delete"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
