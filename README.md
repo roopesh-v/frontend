@@ -84,6 +84,16 @@ Requirements:
 
 9. Add salary distribution chart using Recharts.
 
+10. Add employee search input.
+
+Requirements:
+- filter employees by name
+- debounce input
+- clean UI
+
+11. Add country dropdown filter for employees table.
+
+12. Add country dropdown filter for employees table.
 
 ```
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
 import EmployeeForm, { employeeToFormValues } from "../components/EmployeeForm";
 import "./Employees.css";
@@ -33,12 +33,39 @@ function getEmployeeFullName(emp) {
   );
 }
 
+function getEmployeeCountry(emp) {
+  return emp?.country ?? emp?.location?.country ?? "";
+}
+
+function matchesNameSearch(emp, query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+
+  const first = (emp?.firstName ?? emp?.first_name ?? "").toLowerCase();
+  const last = (emp?.lastName ?? emp?.last_name ?? "").toLowerCase();
+  const full = getEmployeeFullName(emp).toLowerCase();
+
+  return full.includes(q) || first.includes(q) || last.includes(q);
+}
+
+function matchesCountryFilter(emp, country) {
+  if (!country) return true;
+  return getEmployeeCountry(emp) === country;
+}
+
+const SEARCH_DEBOUNCE_MS = 300;
+const PAGE_SIZE = 10;
+
 export default function Employees() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [countryFilter, setCountryFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const refreshEmployees = useCallback(async ({ silent = false } = {}) => {
     if (!silent) setLoading(true);
@@ -97,6 +124,54 @@ export default function Employees() {
     refreshEmployees();
   }, [refreshEmployees]);
 
+  useEffect(() => {
+    const timer = setTimeout(
+      () => setDebouncedSearch(searchQuery),
+      SEARCH_DEBOUNCE_MS
+    );
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, countryFilter]);
+
+  const countryOptions = useMemo(() => {
+    const countries = employees.map(getEmployeeCountry).filter(Boolean);
+    return [...new Set(countries)].sort((a, b) => a.localeCompare(b));
+  }, [employees]);
+
+  const filteredEmployees = useMemo(() => {
+    return employees.filter(
+      (emp) =>
+        matchesNameSearch(emp, debouncedSearch) &&
+        matchesCountryFilter(emp, countryFilter)
+    );
+  }, [employees, debouncedSearch, countryFilter]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredEmployees.length / PAGE_SIZE)
+  );
+  const activePage = Math.min(currentPage, totalPages);
+
+  const paginatedEmployees = useMemo(() => {
+    const start = (activePage - 1) * PAGE_SIZE;
+    return filteredEmployees.slice(start, start + PAGE_SIZE);
+  }, [filteredEmployees, activePage]);
+
+  const rangeStart =
+    filteredEmployees.length === 0 ? 0 : (activePage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(activePage * PAGE_SIZE, filteredEmployees.length);
+
+  const isFiltering =
+    debouncedSearch.trim().length > 0 || countryFilter !== "";
+  const countLabel = loading
+    ? "Loading…"
+    : isFiltering
+      ? `${filteredEmployees.length} of ${employees.length}`
+      : `${employees.length} total`;
+
   return (
     <section className="employeesPage">
       <div className="employeesHeader">
@@ -104,9 +179,7 @@ export default function Employees() {
           <h1 className="employeesTitle">Employees</h1>
           <p className="employeesSubtitle">Directory and compensation overview</p>
         </div>
-        <div className="employeesMeta">
-          {loading ? "Loading…" : `${employees.length} total`}
-        </div>
+        <div className="employeesMeta">{countLabel}</div>
       </div>
 
       <div className="employeesFormWrap" id="employee-form">
@@ -145,6 +218,54 @@ export default function Employees() {
             </div>
           </div>
         ) : (
+          <>
+            <div className="employeesToolbar">
+              <div className="employeesFilters">
+                <label className="employeesSearch" htmlFor="employee-search">
+                  <span className="employeesSearchLabel">Search by name</span>
+                  <input
+                    id="employee-search"
+                    type="search"
+                    className="employeesSearchInput"
+                    placeholder="Search employees…"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoComplete="off"
+                  />
+                </label>
+                <label className="employeesFilter" htmlFor="employee-country">
+                  <span className="employeesSearchLabel">Country</span>
+                  <select
+                    id="employee-country"
+                    className="employeesSelect"
+                    value={countryFilter}
+                    onChange={(e) => setCountryFilter(e.target.value)}
+                  >
+                    <option value="">All countries</option>
+                    {countryOptions.map((country) => (
+                      <option key={country} value={country}>
+                        {country}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              {searchQuery !== debouncedSearch && (
+                <span className="employeesSearchPending" aria-live="polite">
+                  Searching…
+                </span>
+              )}
+            </div>
+
+            {filteredEmployees.length === 0 ? (
+              <div className="employeesState">
+                <div className="employeesStateTitle">No matching employees</div>
+                <div className="employeesStateHint">
+                  Try different filters or clear your search and country selection.
+                </div>
+              </div>
+            ) : (
+          <>
           <div className="employeesTableWrap">
             <table className="employeesTable">
               <thead>
@@ -162,11 +283,11 @@ export default function Employees() {
                 </tr>
               </thead>
               <tbody>
-                {employees.map((emp, idx) => {
+                {paginatedEmployees.map((emp, idx) => {
                   const id = getEmployeeId(emp);
                   const fullName = getEmployeeFullName(emp);
                   const email = emp?.email ?? "—";
-                  const country = emp?.country ?? emp?.location?.country ?? "—";
+                  const country = getEmployeeCountry(emp) || "—";
                   const jobTitle =
                     emp?.jobTitle ?? emp?.job_title ?? emp?.title ?? "—";
                   const salary = emp?.salary ?? emp?.compensation?.salary;
@@ -218,6 +339,43 @@ export default function Employees() {
               </tbody>
             </table>
           </div>
+
+            {totalPages > 1 && (
+              <nav
+                className="employeesPagination"
+                aria-label="Employee list pagination"
+              >
+                <p className="employeesPaginationInfo">
+                  Showing {rangeStart}–{rangeEnd} of {filteredEmployees.length}
+                </p>
+                <div className="employeesPaginationControls">
+                  <button
+                    type="button"
+                    className="employeesPaginationBtn"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={activePage <= 1}
+                  >
+                    Previous
+                  </button>
+                  <span className="employeesPaginationStatus">
+                    Page {activePage} of {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="employeesPaginationBtn"
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={activePage >= totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              </nav>
+            )}
+          </>
+            )}
+          </>
         )}
       </div>
     </section>

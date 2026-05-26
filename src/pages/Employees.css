@@ -41,9 +41,159 @@
   overflow: hidden;
 }
 
+.employeesToolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 0;
+}
+
+.employeesFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  flex: 1;
+}
+
+.employeesSearch {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.employeesFilter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.employeesSearchLabel {
+  font-size: 12px;
+  color: #475569;
+  font-weight: 700;
+}
+
+.employeesSearchInput {
+  height: 40px;
+  width: 100%;
+  padding: 0 12px 0 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.9)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-4.35-4.35M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z'/%3E%3C/svg%3E")
+    no-repeat 12px center;
+  outline: none;
+  font-size: 14px;
+  color: #0f172a;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.employeesSearchInput::placeholder {
+  color: #94a3b8;
+}
+
+.employeesSearchInput:focus {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.employeesSelect {
+  height: 40px;
+  width: 100%;
+  padding: 0 32px 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  outline: none;
+  font-size: 14px;
+  color: #0f172a;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.employeesSelect:focus {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.employeesSearchPending {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  padding-bottom: 10px;
+  white-space: nowrap;
+}
+
 .employeesTableWrap {
   width: 100%;
   overflow: auto;
+}
+
+.employeesPagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.employeesPaginationInfo {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.employeesPaginationControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.employeesPaginationStatus {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  min-width: 100px;
+  text-align: center;
+}
+
+.employeesPaginationBtn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  color: #334155;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.employeesPaginationBtn:hover:not(:disabled) {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.25);
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.employeesPaginationBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .employeesTable {
@@ -203,5 +353,30 @@
   .employeesHeader {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .employeesToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .employeesFilters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .employeesSearch,
+  .employeesFilter {
+    max-width: none;
+    min-width: 0;
+  }
+
+  .employeesPagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .employeesPaginationControls {
+    justify-content: space-between;
   }
 }
