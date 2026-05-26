@@ -1,0 +1,228 @@
+.dashboardHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0 18px;
+}
+
+.dashboardTitle {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+.dashboardSubtitle {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+.dashboardMeta {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.dashboardCharts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+@media (min-width: 1024px) {
+  .dashboardCharts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.dashboardChartPanel {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.dashboardChartTitle {
+  margin: 0 0 4px;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.dashboardChartHint {
+  margin: 0 0 12px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.dashboardChartWrap {
+  width: 100%;
+  min-height: 320px;
+}
+
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.dashboardCard {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.dashboardCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.10);
+}
+
+.dashboardCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dashboardCardCountry {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.dashboardCardBadge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.10);
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dashboardCardStats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dashboardStat {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.dashboardStat--highlight {
+  grid-column: 1 / -1;
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.14);
+}
+
+.dashboardStat dt {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.dashboardStat dd {
+  margin: 6px 0 0;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboardStat--highlight dd {
+  color: #1d4ed8;
+  font-size: 20px;
+}
+
+.dashboardState {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.dashboardState--error {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.dashboardStateTitle {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.dashboardStateHint {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.dashboardSpinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(15, 23, 42, 0.18);
+  border-top-color: rgba(37, 99, 235, 0.85);
+  animation: dashboardSpin 900ms linear infinite;
+}
+
+@keyframes dashboardSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .dashboardHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboardCharts {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboardCard {
+    transition: none;
+  }
+  .dashboardCard:hover {
+    transform: none;
+  }
+  .dashboardSpinner {
+    animation: none;
+  }
+}

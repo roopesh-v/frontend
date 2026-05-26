@@ -68,6 +68,21 @@ Requirements:
 - update employee
 - refresh employee list
 
+7. Create a Dashboard page.
+
+Requirements:
+- fetch data from GET /insights/country
+- display cards:
+  country
+  min salary
+  max salary
+  average salary
+  total employees
+- clean responsive UI
+
+8. Add Recharts bar chart for average salary by country.
+
+9. Add salary distribution chart using Recharts.
 
 
 ```
